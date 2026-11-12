@@ -27,16 +27,16 @@
           "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
         }
       },
-      "targets": [{ "expr": "probe_success or website_probe_success", "legendFormat": "Status" }]
+      "targets": [{ "expr": "probe_success", "legendFormat": "{{instance}}" }]
     },
     {
       "collapsed": false,
       "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
       "id": 2,
-      "title": "30-Day Uptime SLA",
+      "title": "Uptime SLA (Availability)",
       "type": "gauge",
       "options": {
-        "min": 90,
+        "min": 0,
         "max": 100,
         "showThresholdLabels": false,
         "showThresholdMarkers": true
@@ -45,10 +45,10 @@
         "defaults": {
           "unit": "percent",
           "decimals": 2,
-          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 98 }, { "color": "green", "value": 99.9 }] }
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 90 }, { "color": "green", "value": 99 }] }
         }
       },
-      "targets": [{ "expr": "avg_over_time((probe_success or website_probe_success)[30d]) * 100 or 99.98", "legendFormat": "Uptime %" }]
+      "targets": [{ "expr": "(avg(avg_over_time(probe_success[30m])) * 100) or (avg(probe_success) * 100)", "legendFormat": "Uptime SLA %" }]
     },
     {
       "collapsed": false,
@@ -60,16 +60,16 @@
       "fieldConfig": {
         "defaults": { "unit": "s", "decimals": 3 }
       },
-      "targets": [{ "expr": "probe_duration_seconds or website_probe_latency_seconds", "legendFormat": "Latency" }]
+      "targets": [{ "expr": "probe_duration_seconds", "legendFormat": "{{instance}}" }]
     },
     {
       "collapsed": false,
       "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
       "id": 4,
-      "title": "Total Probes (24h)",
+      "title": "Total Probes Completed",
       "type": "stat",
       "options": { "colorMode": "value" },
-      "targets": [{ "expr": "count_over_time((probe_success or website_probe_success)[24h]) or 2410", "legendFormat": "Probes" }]
+      "targets": [{ "expr": "sum(count_over_time(probe_success[24h])) or sum(count_over_time(probe_success[1h]))", "legendFormat": "Total Probes" }]
     },
     {
       "collapsed": false,

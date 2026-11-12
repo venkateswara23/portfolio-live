@@ -34,6 +34,8 @@ services:
       - "9115:9115"
     networks:
       - monitoring-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   # ============================================================================
   # 3. GRAFANA: Observability & Availability Dashboard
