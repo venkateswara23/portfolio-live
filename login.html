@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Timmareddy Venkateswara Reddy Portfolio</title>
+  <link rel="icon" type="image/png" href="assets/images/profile.png">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Core & Auth CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body class="auth-page">
+
+  <div class="auth-wrapper">
+    <!-- Left Column: Branding, Profile & Credentials Helper -->
+    <div class="auth-brand-pane">
+      <div>
+        <div class="auth-brand-header">
+          <div class="logo-badge" style="width:44px; height:44px; font-size:1.25rem;">T</div>
+          <div>
+            <div class="auth-brand-title">Timmareddy Venkateswara Reddy</div>
+            <div class="auth-brand-subtitle">VIT-AP Integrated M.Tech CSE</div>
+          </div>
+        </div>
+
+        <div class="auth-brand-hero">
+          <h2>Secure Portfolio & Management Access</h2>
+          <p>
+            Authenticate to manage contact inquiries, adjust portfolio settings, download full documentation, 
+            and access developer controls.
+          </p>
+        </div>
+
+        <!-- Fixed Credentials Helper Badge -->
+        <div class="demo-creds-box">
+          <div class="demo-creds-header">
+            <span class="demo-creds-title">
+              <i class="fa-solid fa-key"></i> Fixed Demo Credentials
+            </span>
+            <button class="quick-fill-btn" id="btn-quick-fill" type="button" title="Fill into form automatically">
+              <i class="fa-solid fa-bolt"></i> Auto-Fill
+            </button>
+          </div>
+
+          <div class="cred-row">
+            <span>Username:</span>
+            <span class="cred-code" id="demo-user">venkateswara</span>
+          </div>
+          <div class="cred-row">
+            <span>Email:</span>
+            <span class="cred-code" style="font-size:0.75rem;" id="demo-email">venkateswara.23MIC7132@vitapstudent.ac.in</span>
+          </div>
+          <div class="cred-row">
+            <span>Password:</span>
+            <span class="cred-code" id="demo-pass">vitap2028</span>
+          </div>
+          <div class="cred-row" style="margin-top:0.4rem; padding-top:0.4rem; border-top:1px dashed rgba(255,255,255,0.1);">
+            <span>Admin Demo:</span>
+            <span class="cred-code">admin / admin123</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="auth-brand-footer">
+        <i class="fa-solid fa-shield-halved" style="color:var(--accent-emerald);"></i>
+        <span>Dual-Mode Auth: Java REST Backend & Client Storage</span>
+      </div>
+    </div>
+
+    <!-- Right Column: Authentication Form -->
+    <div class="auth-form-pane">
+      <div class="auth-form-header">
+        <h1>Welcome Back</h1>
+        <p>Please select your preferred sign-in method to continue.</p>
+      </div>
+
+      <!-- Option 1: Continue with Google -->
+      <button type="button" class="btn-google" id="btn-google-login">
+        <svg class="google-icon" viewBox="0 0 48 48">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span>or sign in with fixed credentials</span>
+      </div>
+
+      <!-- Option 2: Fixed Credentials Form -->
+      <form id="credentials-form">
+        <div class="auth-field">
+          <label class="auth-label" for="login-username">
+            <span>Username or Student Email</span>
+          </label>
+          <input 
+            type="text" 
+            id="login-username" 
+            class="auth-input" 
+            placeholder="e.g. venkateswara or admin" 
+            required 
+            autocomplete="username"
+          >
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label" for="login-password">
+            <span>Password</span>
+          </label>
+          <div class="password-input-wrapper">
+            <input 
+              type="password" 
+              id="login-password" 
+              class="auth-input" 
+              placeholder="Enter your password" 
+              required 
+              autocomplete="current-password"
+            >
+            <button type="button" class="toggle-password-btn" id="btn-toggle-pass" title="Toggle password visibility">
+              <i class="fa-solid fa-eye" id="eye-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="auth-options">
+          <label class="remember-label">
+            <input type="checkbox" id="remember-me" checked>
+            <span>Remember this device</span>
+          </label>
+          <a href="#" class="forgot-link" id="link-forgot-pass">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-submit-auth" id="btn-submit">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          <span>Sign In</span>
+        </button>
+      </form>
+
+      <div class="auth-back-link">
+        <span>Just browsing?</span>
+        <a href="index.html">Return to Public Portfolio &rarr;</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/main.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // If already logged in, redirect to admin
+      if (AuthService.isAuthenticated()) {
+        showToast("You are already logged in! Redirecting...", "info");
+        setTimeout(() => window.location.href = "admin.html", 800);
+      }
+
+      // Quick Fill Demo Credentials
+      const quickFillBtn = document.getElementById("btn-quick-fill");
+      quickFillBtn?.addEventListener("click", () => {
+        document.getElementById("login-username").value = "venkateswara";
+        document.getElementById("login-password").value = "vitap2028";
+        showToast("Filled demo credentials into form!", "success");
+      });
+
+      // Toggle Password Visibility
+      const togglePassBtn = document.getElementById("btn-toggle-pass");
+      const passInput = document.getElementById("login-password");
+      const eyeIcon = document.getElementById("eye-icon");
+
+      togglePassBtn?.addEventListener("click", () => {
+        const isPassword = passInput.getAttribute("type") === "password";
+        passInput.setAttribute("type", isPassword ? "text" : "password");
+        eyeIcon.className = isPassword ? "fa-solid fa-eye-slash" : "fa-solid fa-eye";
+      });
+
+      // Forgot Password Hint
+      document.getElementById("link-forgot-pass")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        alert("Demo Credentials:\n\nUsername: venkateswara\nPassword: vitap2028\n\nAdmin: admin\nPassword: admin123");
+      });
+
+      // Fixed Credentials Submit Handler
+      const form = document.getElementById("credentials-form");
+      const submitBtn = document.getElementById("btn-submit");
+
+      form?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value.trim();
+        const remember = document.getElementById("remember-me").checked;
+
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+        try {
+          const result = await AuthService.loginWithCredentials(username, password, remember);
+          showToast(result.message, "success");
+          setTimeout(() => {
+            window.location.href = "admin.html";
+          }, 800);
+        } catch (err) {
+          showToast(err.message || "Authentication failed.", "error");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+        }
+      });
+
+      // "Continue with Google" Handler
+      const googleBtn = document.getElementById("btn-google-login");
+      googleBtn?.addEventListener("click", () => {
+        AuthService.showGoogleAccountChooser(() => {
+          showToast("Signed in with Google! Redirecting...", "success");
+          setTimeout(() => {
+            window.location.href = "admin.html";
+          }, 800);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Compile Java Backend",
+      "type": "shell",
+      "windows": {
+        "command": "javac -encoding UTF-8 -d bin src/main/java/com/portfolio/models/*.java src/main/java/com/portfolio/*.java"
+      },
+      "command": "javac -encoding UTF-8 -d bin src/main/java/com/portfolio/models/*.java src/main/java/com/portfolio/*.java",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$javac"]
+    },
+    {
+      "label": "Start Java Portfolio Server",
+      "type": "shell",
+      "dependsOn": "Compile Java Backend",
+      "command": "java -cp bin com.portfolio.PortfolioServer 8080",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Python Server",
+      "type": "shell",
+      "command": "python server.py",
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

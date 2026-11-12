@@ -1,0 +1,14 @@
+# Render Blueprint specification for Timmareddy Venkateswara Reddy Portfolio
+# Documentation: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: tvr-portfolio-server
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python server.py"
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"

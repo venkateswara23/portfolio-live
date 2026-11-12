@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Resume - Timmareddy Venkateswara Reddy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="../images/profile.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f1f5f9;
+      color: #1e293b;
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+    .resume-page {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #ffffff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+    }
+    .resume-sidebar {
+      background: #23272d;
+      color: #f8fafc;
+      padding: 2.5rem 1.75rem;
+    }
+    .profile-wrap {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .profile-img {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 4px solid #ffffff;
+      object-fit: cover;
+      margin: 0 auto 1rem;
+      display: block;
+    }
+    .side-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      padding-bottom: 0.4rem;
+      margin: 1.75rem 0 1rem;
+    }
+    .side-item {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      margin-bottom: 0.75rem;
+    }
+    .side-item strong {
+      color: #ffffff;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+    .resume-main {
+      padding: 2.5rem 2.25rem;
+    }
+    .name-header h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+    .name-header .title {
+      font-size: 1.05rem;
+      color: #475569;
+      margin-top: 0.25rem;
+      margin-bottom: 1.75rem;
+      font-weight: 600;
+    }
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #0f172a;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.4rem;
+      margin: 1.75rem 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .entry-card {
+      margin-bottom: 1.25rem;
+    }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.25rem;
+    }
+    .entry-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .entry-date {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .entry-subtitle {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #2563eb;
+      margin-bottom: 0.4rem;
+    }
+    .entry-desc {
+      font-size: 0.88rem;
+      color: #475569;
+      line-height: 1.55;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      color: #334155;
+      margin-bottom: 0.5rem;
+      word-break: break-all;
+    }
+    .contact-item i {
+      color: #2563eb;
+      width: 16px;
+    }
+    .print-actions {
+      max-width: 820px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-print {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .print-actions { display: none; }
+      .resume-page { box-shadow: none; border-radius: 0; width: 100%; max-width: 100%; }
+    }
+    @media (max-width: 650px) {
+      .resume-page { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="print-actions">
+    <a href="../../index.html" style="color:#2563eb; text-decoration:none; font-weight:600;">
+      &larr; Back to Portfolio
+    </a>
+    <button class="btn-print" onclick="window.print()">
+      <i class="fa-solid fa-print"></i> Print / Save as PDF
+    </button>
+  </div>
+
+  <div class="resume-page">
+    <!-- Left Sidebar -->
+    <div class="resume-sidebar">
+      <div class="profile-wrap">
+        <img src="../images/profile.png" alt="Timmareddy Venkateswara Reddy" class="profile-img">
+      </div>
+
+      <div class="side-title">Expertise</div>
+      <div class="side-item">
+        <strong>Programming</strong>
+        Java, Python, SQL, JavaScript
+      </div>
+      <div class="side-item">
+        <strong>Web</strong>
+        HTML, CSS
+      </div>
+      <div class="side-item">
+        <strong>Database</strong>
+        MySQL, Elasticsearch
+      </div>
+      <div class="side-item">
+        <strong>Tools & DevOps</strong>
+        Grafana, Prometheus, ELK Stack, Docker, GitHub, VS Code, Android Studio
+      </div>
+
+      <div class="side-title">Language</div>
+      <div class="side-item">
+        <strong>Telugu</strong>
+        Native
+      </div>
+      <div class="side-item">
+        <strong>English</strong>
+        Professional Working Proficiency
+      </div>
+
+      <div class="side-title">Awards & Certifications</div>
+      <div class="side-item" style="color:#94a3b8;">
+        Certifications: In Progress<br>
+        VIT-AP Engineering Coursework
+      </div>
+    </div>
+
+    <!-- Right Main Column -->
+    <div class="resume-main">
+      <div class="name-header">
+        <h1>Timmareddy<br>Venkateswara Reddy</h1>
+        <div class="title">Student / Student Developer</div>
+      </div>
+
+      <!-- Projects Section -->
+      <div class="section-title">
+        <i class="fa-solid fa-laptop-code" style="color:#2563eb;"></i>
+        <span>Projects</span>
+      </div>
+      <div class="entry-card">
+        <div class="entry-header">
+          <div class="entry-title">Grafana & Prometheus: Website Uptime & Availability Monitoring</div>
+          <div class="entry-date">2024 - Present</div>
+        </div>
+        <div class="entry-subtitle">Site Reliability Engineering (SRE) & Observability</div>
+        <div class="entry-desc">
+          Configured Grafana and Prometheus with Blackbox Exporter to monitor website uptime, track HTTP response latencies, detect downtime incidents, and visualize real-time SLA metrics. Configured automated synthetic HTTP health probes and alert rules for outage notifications.
+        </div>
+      </div>
+      <div class="entry-card">
+        <div class="entry-header">
+          <div class="entry-title">ELK Stack: Centralized Logging & Observability Pipeline</div>
+          <div class="entry-date">2024 - Present</div>
+        </div>
+        <div class="entry-subtitle">DevOps & System Observability</div>
+        <div class="entry-desc">
+          Integrated Elasticsearch, Logstash, and Kibana (ELK Stack) to collect, process, search, and visualize application or server logs. Configured Logstash Grok filters to parse multiline log streams, indexed records in Elasticsearch clusters, and designed Kibana dashboards for real-time error rate tracking and system health monitoring.
+        </div>
+      </div>
+      <div class="entry-card">
+        <div class="entry-header">
+          <div class="entry-title">Academic & Personal Projects</div>
+          <div class="entry-date">2023 - Present</div>
+        </div>
+        <div class="entry-subtitle">Student Developer</div>
+        <div class="entry-desc">
+          Currently working on academic and personal software done focused on Java, Python, SQL, and Mobile Application Development. Goal-driven approach to creating user-friendly solutions.
+        </div>
+      </div>
+
+      <!-- Education Section -->
+      <div class="section-title">
+        <i class="fa-solid fa-graduation-cap" style="color:#2563eb;"></i>
+        <span>Education</span>
+      </div>
+      <div class="entry-card">
+        <div class="entry-header">
+          <div class="entry-title">Vellore Institute of Technology – Andhra Pradesh</div>
+          <div class="entry-date">2023 - 2028 (Expected)</div>
+        </div>
+        <div class="entry-subtitle">M.Tech Integrated with Computer Science and Engineering (CSE)</div>
+        <div class="entry-desc">
+          Focus on programming, algorithms, data structures, and database continuous learning.
+        </div>
+      </div>
+
+      <!-- Contact Section -->
+      <div class="section-title">
+        <i class="fa-regular fa-address-book" style="color:#2563eb;"></i>
+        <span>Contact</span>
+      </div>
+      <div class="contact-item">
+        <i class="fa-solid fa-phone"></i>
+        <span>Phone: +91 000-000-0000 (Placeholder)</span>
+      </div>
+      <div class="contact-item">
+        <i class="fa-regular fa-envelope"></i>
+        <span>Email: venkateswara.23MIC7132@vitapstudent.ac.in</span>
+      </div>
+      <div class="contact-item">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>Address: Duvvur, Kadapa, Andhra Pradesh</span>
+      </div>
+      <div class="contact-item">
+        <i class="fa-brands fa-github"></i>
+        <span>GitHub: https://github.com/venkateswara23</span>
+      </div>
+      <div class="contact-item">
+        <i class="fa-brands fa-linkedin"></i>
+        <span>LinkedIn: https://www.linkedin.com/in/venkateswara-reddy-771559a381</span>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Launch Java PortfolioServer",
+      "request": "launch",
+      "mainClass": "com.portfolio.PortfolioServer",
+      "projectName": "portfolio-venkateswara",
+      "args": "8080"
+    },
+    {
+      "name": "Launch index.html (Chrome/Edge)",
+      "type": "msedge",
+      "request": "launch",
+      "file": "${workspaceFolder}/index.html"
+    }
+  ]
+}

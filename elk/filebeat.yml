@@ -1,0 +1,19 @@
+# ==============================================================================
+# Filebeat Configuration for Portfolio Server Log Harvester
+# ==============================================================================
+
+filebeat.inputs:
+  - type: filestream
+    id: portfolio-server-logs
+    enabled: true
+    paths:
+      - /logs/portfolio-elk.log
+    parsers:
+      - ndjson:
+          target: ""
+          add_error_key: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: info

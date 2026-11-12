@@ -1,0 +1,3 @@
+# Timmareddy Venkateswara Reddy Portfolio Backend Dependencies
+# The backend server.py runs on standard Python 3 (http.server, socketserver, json, time, os, sys)
+# Zero external packages are strictly required.

@@ -1,0 +1,67 @@
+services:
+  # ============================================================================
+  # 1. PROMETHEUS: Time-Series Metrics & Probing Engine
+  # ============================================================================
+  prometheus:
+    image: prom/prometheus:v2.49.1
+    container_name: portfolio-prometheus
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - promdata:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============================================================================
+  # 2. BLACKBOX EXPORTER: Synthetic HTTP/HTTPS Endpoint Probing
+  # ============================================================================
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.24.0
+    container_name: portfolio-blackbox-exporter
+    volumes:
+      - ./monitoring/blackbox.yml:/config/blackbox.yml:ro
+    command:
+      - '--config.file=/config/blackbox.yml'
+    ports:
+      - "9115:9115"
+    networks:
+      - monitoring-net
+
+  # ============================================================================
+  # 3. GRAFANA: Observability & Availability Dashboard
+  # ============================================================================
+  grafana:
+    image: grafana/grafana:10.3.3
+    container_name: portfolio-grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafanadata:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring-net
+    depends_on:
+      - prometheus
+
+networks:
+  monitoring-net:
+    driver: bridge
+
+volumes:
+  promdata:
+    driver: local
+  grafanadata:
+    driver: local

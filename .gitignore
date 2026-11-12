@@ -1,0 +1,25 @@
+# Operating System Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor Files
+.idea/
+*.iml
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Java Build Artifacts
+target/
+*.class
+
+# Server Logs & Temp Files
+*.log
+logs/
+tmp/
+
+# Python Cache
+__pycache__/
+*.py[cod]

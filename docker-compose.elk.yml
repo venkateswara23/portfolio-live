@@ -1,0 +1,88 @@
+services:
+  # ============================================================================
+  # 1. ELASTICSEARCH: Distributed Search & Analytics Engine
+  # ============================================================================
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: portfolio-elasticsearch
+    environment:
+      - node.name=elasticsearch-node1
+      - cluster.name=portfolio-cluster
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - elk-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cat/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ============================================================================
+  # 2. LOGSTASH: Server-Side Data Ingestion & Processing Pipeline
+  # ============================================================================
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    container_name: portfolio-logstash
+    volumes:
+      - ./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./logs:/usr/share/logstash/pipeline/logs:ro
+    environment:
+      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+    ports:
+      - "5044:5044"  # Beats input
+      - "5000:5000"  # TCP input
+      - "9600:9600"  # Logstash Monitoring API
+    networks:
+      - elk-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ============================================================================
+  # 3. KIBANA: Visualization & Exploration Dashboard
+  # ============================================================================
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: portfolio-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_NAME=kibana.local
+    ports:
+      - "5601:5601"
+    networks:
+      - elk-net
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  # ============================================================================
+  # 4. FILEBEAT: Lightweight Log Shipper
+  # ============================================================================
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.12.0
+    container_name: portfolio-filebeat
+    user: root
+    volumes:
+      - ./elk/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./logs:/logs:ro
+    command: filebeat -e -strict.perms=false
+    networks:
+      - elk-net
+    depends_on:
+      - logstash
+
+networks:
+  elk-net:
+    driver: bridge
+
+volumes:
+  esdata:
+    driver: local

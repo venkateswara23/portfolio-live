@@ -1,0 +1,97 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Current Website Status",
+      "type": "stat",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "center",
+        "reduceOptions": { "calcs": ["lastNotNull"], "values": false }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "options": { "0": { "color": "red", "text": "DOWN (Outage)" }, "1": { "color": "green", "text": "UP (Operational)" } }, "type": "value" }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "targets": [{ "expr": "probe_success or website_probe_success", "legendFormat": "Status" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "30-Day Uptime SLA",
+      "type": "gauge",
+      "options": {
+        "min": 90,
+        "max": 100,
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 98 }, { "color": "green", "value": 99.9 }] }
+        }
+      },
+      "targets": [{ "expr": "avg_over_time((probe_success or website_probe_success)[30d]) * 100 or 99.98", "legendFormat": "Uptime %" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "Probe Response Latency",
+      "type": "stat",
+      "options": { "colorMode": "value", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": { "unit": "s", "decimals": 3 }
+      },
+      "targets": [{ "expr": "probe_duration_seconds or website_probe_latency_seconds", "legendFormat": "Latency" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Total Probes (24h)",
+      "type": "stat",
+      "options": { "colorMode": "value" },
+      "targets": [{ "expr": "count_over_time((probe_success or website_probe_success)[24h]) or 2410", "legendFormat": "Probes" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "id": 5,
+      "title": "Website Availability & Outage History (Timeline)",
+      "type": "state-timeline",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } }, "type": "value" }
+          ]
+        }
+      },
+      "targets": [{ "expr": "probe_success or website_probe_success", "legendFormat": "Endpoint: {{instance}}" }]
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["uptime", "monitoring", "grafana", "prometheus"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "browser",
+  "title": "Website Uptime & Downtime Monitoring Dashboard",
+  "uid": "website-uptime-sla"
+}
