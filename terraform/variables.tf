@@ -1,37 +1,35 @@
-# Terraform Input Variables for Timmareddy Venkateswara Reddy Portfolio AWS Infrastructure
-
 variable "aws_region" {
-  description = "AWS Region to deploy resources (e.g. ap-south-1 for Mumbai, us-east-1 for N. Virginia)"
+  description = "AWS region for deployment"
   type        = string
   default     = "ap-south-1"
 }
 
 variable "environment" {
-  description = "Environment tag (e.g., dev, staging, production)"
+  description = "Environment tag"
   type        = string
   default     = "production"
 }
 
 variable "project_name" {
-  description = "Project identifier tag"
+  description = "Project resource-name prefix"
   type        = string
   default     = "tvr-portfolio"
 }
 
 variable "instance_type" {
-  description = "AWS EC2 instance type (t2.micro / t3.micro are Free Tier eligible)"
+  description = "EC2 instance type; check current regional pricing before use"
   type        = string
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "key_name" {
-  description = "Name of the existing AWS Key Pair for SSH access (optional, leave empty if creating without key)"
+  description = "Existing EC2 key pair name; leave empty if SSH access is not required"
   type        = string
   default     = ""
 }
 
 variable "allowed_ssh_cidr" {
-  description = "CIDR block permitted for SSH access"
+  description = "Your public IPv4 address with /32, e.g. 203.0.113.10/32; leave empty to disable SSH"
   type        = string
-  default     = "0.0.0.0/0"
+  default     = ""
 }
