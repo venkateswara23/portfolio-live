@@ -1,8 +1,6 @@
-# Terraform AWS Infrastructure as Code (IaC) for Portfolio Deployment
-# Provisions: VPC, Public Subnet, Internet Gateway, Security Group, and EC2 Instance
-
 terraform {
-  required_version = ">= 1.0.0"
+  required_version = ">= 1.5.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -15,7 +13,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-# 1. Dedicated VPC
 resource "aws_vpc" "portfolio_vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
@@ -27,17 +24,14 @@ resource "aws_vpc" "portfolio_vpc" {
   }
 }
 
-# 2. Internet Gateway
 resource "aws_internet_gateway" "portfolio_igw" {
   vpc_id = aws_vpc.portfolio_vpc.id
 
   tags = {
-    Name        = "${var.project_name}-igw"
-    Environment = var.environment
+    Name = "${var.project_name}-igw"
   }
 }
 
-# 3. Public Subnet
 resource "aws_subnet" "portfolio_public_subnet" {
   vpc_id                  = aws_vpc.portfolio_vpc.id
   cidr_block              = "10.0.1.0/24"
@@ -45,12 +39,10 @@ resource "aws_subnet" "portfolio_public_subnet" {
   availability_zone       = "${var.aws_region}a"
 
   tags = {
-    Name        = "${var.project_name}-public-subnet"
-    Environment = var.environment
+    Name = "${var.project_name}-public-subnet"
   }
 }
 
-# 4. Route Table & Association
 resource "aws_route_table" "portfolio_public_rt" {
   vpc_id = aws_vpc.portfolio_vpc.id
 
@@ -60,8 +52,7 @@ resource "aws_route_table" "portfolio_public_rt" {
   }
 
   tags = {
-    Name        = "${var.project_name}-public-rt"
-    Environment = var.environment
+    Name = "${var.project_name}-public-rt"
   }
 }
 
@@ -70,67 +61,38 @@ resource "aws_route_table_association" "portfolio_rta" {
   route_table_id = aws_route_table.portfolio_public_rt.id
 }
 
-# 5. Security Group
 resource "aws_security_group" "portfolio_sg" {
   name        = "${var.project_name}-sg"
-  description = "Security Group allowing SSH, HTTP, HTTPS, Portfolio App, and Monitoring"
+  description = "Public web access; optional SSH restricted to the operator IP"
   vpc_id      = aws_vpc.portfolio_vpc.id
 
-  # SSH
   ingress {
-    description = "SSH Access"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.allowed_ssh_cidr]
-  }
-
-  # Standard HTTP
-  ingress {
-    description = "HTTP Traffic"
+    description = "HTTP"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Standard HTTPS
   ingress {
-    description = "HTTPS Traffic"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Portfolio Server Backend (Port 8080)
-  ingress {
-    description = "Portfolio Web Server"
+    description = "Portfolio application"
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # Grafana Dashboard (Port 3000)
-  ingress {
-    description = "Grafana Observability Dashboard"
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "ingress" {
+    for_each = var.allowed_ssh_cidr == "" ? [] : [var.allowed_ssh_cidr]
+    content {
+      description = "SSH restricted to the configured public IP"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
   }
 
-  # Kibana Log Analytics (Port 5601)
-  ingress {
-    description = "Kibana Analytics Stream"
-    from_port   = 5601
-    to_port     = 5601
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Outbound All Traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -139,15 +101,13 @@ resource "aws_security_group" "portfolio_sg" {
   }
 
   tags = {
-    Name        = "${var.project_name}-sg"
-    Environment = var.environment
+    Name = "${var.project_name}-sg"
   }
 }
 
-# 6. Lookup Latest Official Ubuntu 22.04 LTS AMI
 data "aws_ami" "ubuntu" {
   most_recent = true
-  owners      = ["099720109477"] # Canonical
+  owners      = ["099720109477"]
 
   filter {
     name   = "name"
@@ -160,44 +120,52 @@ data "aws_ami" "ubuntu" {
   }
 }
 
-# 7. AWS EC2 Instance
 resource "aws_instance" "portfolio_server" {
   ami                         = data.aws_ami.ubuntu.id
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.portfolio_public_subnet.id
   vpc_security_group_ids      = [aws_security_group.portfolio_sg.id]
   associate_public_ip_address = true
-  key_name                    = var.key_name != "" ? var.key_name : null
+  key_name                    = var.key_name == "" ? null : var.key_name
 
   root_block_device {
-    volume_size           = 20
+    volume_size           = 12
     volume_type           = "gp3"
     delete_on_termination = true
   }
 
-  # Automated User Data: Install Docker, Docker Compose, Git & Python
+  user_data_replace_on_change = true
   user_data = <<-EOF
-              #!/bin/bash
-              set -e
-              apt-get update -y
-              apt-get install -y ca-certificates curl gnupg lsb-release git python3 python3-pip
+    #!/bin/bash
+    set -euxo pipefail
+    exec > >(tee -a /var/log/portfolio-deploy.log) 2>&1
 
-              # Install Docker
-              mkdir -p /etc/apt/keyrings
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-              apt-get update -y
-              apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    apt-get update -y
+    apt-get install -y ca-certificates curl git docker.io
+    systemctl enable --now docker
 
-              systemctl start docker
-              systemctl enable docker
-              usermod -aG docker ubuntu
+    rm -rf /opt/portfolio
+    git clone --depth 1 https://github.com/venkateswara23/portfolio-live.git /opt/portfolio
 
-              echo "Docker and Dependencies installed successfully!" > /var/log/portfolio-provision.log
-              EOF
+    cd /opt/portfolio
+    docker build -t portfolio-app:latest .
+    docker rm -f portfolio-app || true
+    docker run -d \
+      --name portfolio-app \
+      --restart unless-stopped \
+      -p 8080:8080 \
+      portfolio-app:latest
+
+    echo "Portfolio deployment completed" >> /var/log/portfolio-deploy.log
+  EOF
 
   tags = {
     Name        = "${var.project_name}-ec2"
     Environment = var.environment
   }
+
+  depends_on = [
+    aws_route_table_association.portfolio_rta,
+    aws_internet_gateway.portfolio_igw
+  ]
 }
