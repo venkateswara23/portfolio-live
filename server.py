@@ -253,6 +253,75 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({"success": True, "message": "Log ingested into ELK stream", "entry": simulated}).encode("utf-8"))
             return
 
+        # Authentication & MFA REST Endpoints
+        if self.path.startswith("/api/auth/login"):
+            content_length = int(self.headers.get("Content-Length", 0))
+            post_data = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
+            try:
+                data = json.loads(post_data) if post_data.strip().startswith("{") else {}
+            except Exception:
+                data = {}
+            username = str(data.get("username", "")).strip().lower()
+            password = str(data.get("password", "")).strip()
+
+            valid_users = {
+                "venkateswara": {"email": "venkateswara.23MIC7132@vitapstudent.ac.in", "pass": "vitap2028", "name": "Timmareddy Venkateswara Reddy", "role": "ADMIN"},
+                "admin": {"email": "admin@vitap.ac.in", "pass": "admin123", "name": "Portfolio Administrator", "role": "ADMIN"}
+            }
+
+            matched = None
+            for u, info in valid_users.items():
+                if (username == u or username == info["email"].lower()) and password == info["pass"]:
+                    matched = {"username": u, "email": info["email"], "displayName": info["name"], "role": info["role"]}
+                    break
+
+            if matched:
+                elk_log("INFO", "POST", 200, 15, client_ip, f"Credentials verified for {username}. MFA 2-Step challenge requested.")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "mfaRequired": True,
+                    "user": matched,
+                    "message": "Credentials verified. MFA 2-Step code required."
+                }).encode("utf-8"))
+                return
+            else:
+                elk_log("WARN", "POST", 401, 10, client_ip, f"Failed authentication attempt for: {username}")
+                self.send_response(401)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "message": "Invalid username or password"}).encode("utf-8"))
+                return
+
+        if self.path.startswith("/api/auth/mfa/verify"):
+            content_length = int(self.headers.get("Content-Length", 0))
+            post_data = self.rfile.read(content_length).decode("utf-8") if content_length > 0 else "{}"
+            try:
+                data = json.loads(post_data) if post_data.strip().startswith("{") else {}
+            except Exception:
+                data = {}
+            code = str(data.get("code", "")).strip()
+            if code in ["237132", "VITAP-2028-MFA"]:
+                elk_log("INFO", "POST", 200, 10, client_ip, f"MFA 2-Factor verified successfully with code {code}.")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "success": True,
+                    "message": "MFA verified successfully! Access granted.",
+                    "token": f"tok_mfa_{int(time.time())}"
+                }).encode("utf-8"))
+                return
+            else:
+                elk_log("WARN", "POST", 403, 10, client_ip, f"MFA verification failed for code: {code}")
+                self.send_response(403)
+                self.send_header("Content-Type", "application/json")
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "message": "Invalid MFA verification code"}).encode("utf-8"))
+                return
+
         self.send_response(404)
         self.end_headers()
 

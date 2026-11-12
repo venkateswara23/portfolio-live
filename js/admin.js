@@ -32,11 +32,14 @@ function renderAdminUser(user) {
   if (bannerWelcome) bannerWelcome.textContent = `Welcome back, ${user.displayName}!`;
 
   if (authProviderBadge) {
+    const mfaBadge = user.mfaVerified 
+      ? ' <span style="margin-left:0.5rem; padding:0.2rem 0.6rem; border-radius:12px; background:rgba(16,185,129,0.2); color:#10b981; font-weight:700; border:1px solid rgba(16,185,129,0.4);"><i class="fa-solid fa-shield-halved"></i> 2FA / MFA Verified</span>' 
+      : '';
     if (user.authProvider === "GOOGLE") {
-      authProviderBadge.innerHTML = '<i class="fa-brands fa-google"></i> Signed in via Google OAuth';
+      authProviderBadge.innerHTML = '<i class="fa-brands fa-google"></i> Signed in via Google OAuth' + mfaBadge;
       authProviderBadge.style.color = "#38bdf8";
     } else {
-      authProviderBadge.innerHTML = '<i class="fa-solid fa-key"></i> Signed in via Fixed Credentials';
+      authProviderBadge.innerHTML = '<i class="fa-solid fa-key"></i> Signed in via Fixed Credentials' + mfaBadge;
       authProviderBadge.style.color = "var(--accent-emerald)";
     }
   }

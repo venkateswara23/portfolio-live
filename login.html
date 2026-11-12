@@ -150,6 +150,46 @@
     </div>
   </div>
 
+  <!-- MFA / 2FA Modal Container -->
+  <div id="mfa-backdrop" class="mfa-backdrop" style="display:none;">
+    <div class="mfa-modal" role="dialog" aria-modal="true" aria-labelledby="mfa-heading">
+      <div class="mfa-shield-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <h2 id="mfa-heading" class="mfa-title">Two-Factor Authentication (MFA)</h2>
+      <p class="mfa-desc">
+        For your security, a 6-digit verification code was sent to: <br>
+        <span id="mfa-email-display" class="mfa-target-email">ven***@student.vitap.ac.in</span>
+      </p>
+
+      <!-- Demo Quick-Fill Pill -->
+      <div class="mfa-demo-quickfill" id="btn-mfa-quickfill" title="Click to auto-fill for testing">
+        <span><i class="fa-solid fa-key"></i> Demo OTP Available:</span>
+        <strong><code id="mfa-demo-code">237132</code> (Click to fill)</strong>
+      </div>
+
+      <!-- 6-Digit OTP Inputs -->
+      <div class="mfa-otp-group" id="mfa-otp-group">
+        <input type="text" maxlength="1" class="mfa-otp-digit" inputmode="numeric" pattern="[0-9]*" autofocus>
+        <input type="text" maxlength="1" class="mfa-otp-digit" inputmode="numeric" pattern="[0-9]*">
+        <input type="text" maxlength="1" class="mfa-otp-digit" inputmode="numeric" pattern="[0-9]*">
+        <input type="text" maxlength="1" class="mfa-otp-digit" inputmode="numeric" pattern="[0-9]*">
+        <input type="text" maxlength="1" class="mfa-otp-digit" inputmode="numeric" pattern="[0-9]*">
+        <input type="text" maxlength="1" class="mfa-otp-digit" inputmode="numeric" pattern="[0-9]*">
+      </div>
+
+      <button type="button" class="mfa-btn-verify" id="btn-verify-mfa">
+        <i class="fa-solid fa-lock-open"></i>
+        <span>Verify Code & Continue</span>
+      </button>
+
+      <div class="mfa-footer-actions">
+        <span id="mfa-timer-display">Resend in <b id="mfa-timer-sec">45</b>s</span>
+        <button type="button" class="mfa-cancel-btn" id="btn-cancel-mfa">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container"></div>
 
@@ -188,7 +228,122 @@
       // Forgot Password Hint
       document.getElementById("link-forgot-pass")?.addEventListener("click", (e) => {
         e.preventDefault();
-        alert("Demo Credentials:\n\nUsername: venkateswara\nPassword: vitap2028\n\nAdmin: admin\nPassword: admin123");
+        alert("Demo Credentials:\n\nUsername: venkateswara\nPassword: vitap2028\n\nAdmin: admin\nPassword: admin123\n\nMFA Demo Code: 237132");
+      });
+
+      // MFA UI Elements
+      const mfaBackdrop = document.getElementById("mfa-backdrop");
+      const mfaEmailDisplay = document.getElementById("mfa-email-display");
+      const mfaDemoCode = document.getElementById("mfa-demo-code");
+      const mfaQuickFill = document.getElementById("btn-mfa-quickfill");
+      const mfaVerifyBtn = document.getElementById("btn-verify-mfa");
+      const mfaCancelBtn = document.getElementById("btn-cancel-mfa");
+      const otpInputs = Array.from(document.querySelectorAll(".mfa-otp-digit"));
+      let mfaCountdownInterval = null;
+
+      function openMfaModal(mfaData) {
+        mfaEmailDisplay.textContent = mfaData.maskedEmail || "your registered email";
+        mfaDemoCode.textContent = mfaData.demoCode || "237132";
+        mfaBackdrop.style.display = "flex";
+        otpInputs.forEach(input => input.value = "");
+        otpInputs[0].focus();
+
+        // Start countdown timer
+        let secondsLeft = 60;
+        const timerSec = document.getElementById("mfa-timer-sec");
+        clearInterval(mfaCountdownInterval);
+        mfaCountdownInterval = setInterval(() => {
+          secondsLeft--;
+          if (timerSec) timerSec.textContent = secondsLeft;
+          if (secondsLeft <= 0) {
+            clearInterval(mfaCountdownInterval);
+            const timerContainer = document.getElementById("mfa-timer-display");
+            if (timerContainer) {
+              timerContainer.innerHTML = '<a href="#" class="mfa-resend-link" id="link-resend-otp">Resend OTP</a>';
+              document.getElementById("link-resend-otp")?.addEventListener("click", (e) => {
+                e.preventDefault();
+                showToast("New 6-digit code resent: 237132", "info");
+                openMfaModal(mfaData);
+              });
+            }
+          }
+        }, 1000);
+      }
+
+      function closeMfaModal() {
+        mfaBackdrop.style.display = "none";
+        clearInterval(mfaCountdownInterval);
+      }
+
+      mfaCancelBtn?.addEventListener("click", closeMfaModal);
+
+      // Auto-advance between OTP digit inputs & handle paste
+      otpInputs.forEach((input, index) => {
+        input.addEventListener("input", (e) => {
+          const val = e.target.value.replace(/[^0-9]/g, "");
+          e.target.value = val ? val[0] : "";
+          if (val && index < otpInputs.length - 1) {
+            otpInputs[index + 1].focus();
+          }
+        });
+
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Backspace" && !e.target.value && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+          if (e.key === "Enter") {
+            mfaVerifyBtn.click();
+          }
+        });
+
+        input.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const pasteData = (e.clipboardData || window.clipboardData).getData("text").replace(/[^0-9]/g, "");
+          if (pasteData) {
+            for (let i = 0; i < otpInputs.length && i < pasteData.length; i++) {
+              otpInputs[i].value = pasteData[i];
+            }
+            const focusIndex = Math.min(pasteData.length, otpInputs.length - 1);
+            otpInputs[focusIndex].focus();
+          }
+        });
+      });
+
+      // Quick fill button for testers
+      mfaQuickFill?.addEventListener("click", () => {
+        const code = mfaDemoCode.textContent.trim();
+        for (let i = 0; i < otpInputs.length && i < code.length; i++) {
+          otpInputs[i].value = code[i];
+        }
+        showToast("Auto-filled demo OTP!", "success");
+        otpInputs[otpInputs.length - 1].focus();
+      });
+
+      // Verify OTP Submission
+      mfaVerifyBtn?.addEventListener("click", async () => {
+        const enteredOtp = otpInputs.map(inp => inp.value).join("");
+        if (enteredOtp.length < 6) {
+          showToast("Please enter all 6 digits of the verification code.", "warning");
+          return;
+        }
+
+        mfaVerifyBtn.disabled = true;
+        mfaVerifyBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
+
+        try {
+          const verifyResult = await AuthService.verifyMfaOtp(enteredOtp);
+          showToast(verifyResult.message, "success");
+          closeMfaModal();
+          setTimeout(() => {
+            window.location.href = "admin.html";
+          }, 800);
+        } catch (err) {
+          showToast(err.message || "Invalid OTP code.", "error");
+          mfaVerifyBtn.disabled = false;
+          mfaVerifyBtn.innerHTML = '<i class="fa-solid fa-lock-open"></i> Verify Code & Continue';
+          otpInputs.forEach(inp => inp.value = "");
+          otpInputs[0].focus();
+        }
       });
 
       // Fixed Credentials Submit Handler
@@ -203,14 +358,19 @@
 
         submitBtn.disabled = true;
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Credentials...';
 
         try {
           const result = await AuthService.loginWithCredentials(username, password, remember);
-          showToast(result.message, "success");
-          setTimeout(() => {
-            window.location.href = "admin.html";
-          }, 800);
+          if (result.mfaRequired) {
+            showToast("Credentials accepted! Please complete 2FA verification.", "info");
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            openMfaModal(result);
+          } else {
+            showToast(result.message, "success");
+            setTimeout(() => window.location.href = "admin.html", 800);
+          }
         } catch (err) {
           showToast(err.message || "Authentication failed.", "error");
           submitBtn.disabled = false;
@@ -221,11 +381,15 @@
       // "Continue with Google" Handler
       const googleBtn = document.getElementById("btn-google-login");
       googleBtn?.addEventListener("click", () => {
-        AuthService.showGoogleAccountChooser(() => {
-          showToast("Signed in with Google! Redirecting...", "success");
-          setTimeout(() => {
-            window.location.href = "admin.html";
-          }, 800);
+        AuthService.showGoogleAccountChooser(async (account) => {
+          showToast("Google account authenticated. Verifying 2-Step verification...", "info");
+          const mfaChallenge = await AuthService.requestMfaChallenge({
+            email: account.email,
+            displayName: account.name,
+            role: "ADMIN",
+            avatarUrl: account.picture
+          }, true);
+          openMfaModal(mfaChallenge);
         });
       });
     });

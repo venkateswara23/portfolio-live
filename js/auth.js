@@ -14,6 +14,8 @@ const AUTH_CONFIG = {
   IS_GITHUB_PAGES: window.location.hostname.includes("github.io"),
   STORAGE_KEY_USER: "tvr_portfolio_user",
   STORAGE_KEY_TOKEN: "tvr_portfolio_token",
+  DEFAULT_MFA_OTP: "237132",
+  BACKUP_MFA_CODE: "VITAP-2028-MFA",
   FIXED_USERS: [
     {
       username: "venkateswara",
@@ -55,6 +57,67 @@ const AuthService = {
     return !!this.getUser();
   },
 
+  pendingMfa: null,
+
+  maskEmail(email) {
+    if (!email || !email.includes("@")) return "u***@student.vitap.ac.in";
+    const [name, domain] = email.split("@");
+    const visible = name.length > 3 ? name.slice(0, 3) : name.slice(0, 1);
+    return `${visible}***@${domain}`;
+  },
+
+  async requestMfaChallenge(user, remember = true) {
+    const generatedCode = AUTH_CONFIG.DEFAULT_MFA_OTP || "237132";
+    this.pendingMfa = {
+      user,
+      remember,
+      code: generatedCode,
+      createdAt: Date.now(),
+      attempts: 0
+    };
+    return {
+      success: true,
+      mfaRequired: true,
+      user,
+      maskedEmail: this.maskEmail(user.email),
+      demoCode: generatedCode,
+      message: `MFA 2-Step verification code sent to ${this.maskEmail(user.email)}`
+    };
+  },
+
+  async verifyMfaOtp(inputCode) {
+    if (!this.pendingMfa) {
+      throw new Error("No pending multi-factor verification session found. Please sign in again.");
+    }
+    const clean = String(inputCode).trim();
+    if (!clean) {
+      throw new Error("Please enter the 6-digit verification code.");
+    }
+    const { user, remember, code } = this.pendingMfa;
+    const isValid = (clean === code) || (clean === AUTH_CONFIG.DEFAULT_MFA_OTP) || (clean === AUTH_CONFIG.BACKUP_MFA_CODE);
+
+    if (!isValid) {
+      this.pendingMfa.attempts = (this.pendingMfa.attempts || 0) + 1;
+      if (this.pendingMfa.attempts >= 5) {
+        this.pendingMfa = null;
+        throw new Error("Too many failed MFA attempts. Security lock engaged. Please login again.");
+      }
+      throw new Error("Invalid verification code! Try demo code: 237132");
+    }
+
+    user.mfaVerified = true;
+    user.mfaVerifiedAt = Date.now();
+    const token = "tok_mfa_" + Math.random().toString(36).substring(2);
+    this.saveSession(user, token, remember);
+    this.pendingMfa = null;
+    return {
+      success: true,
+      user,
+      token,
+      message: "Two-Factor Authentication verified successfully! Access granted."
+    };
+  },
+
   /**
    * Save session to storage
    */
@@ -75,7 +138,7 @@ const AuthService = {
     const input = usernameOrEmail.trim().toLowerCase();
     const pass = password.trim();
 
-    // 1. Attempt to call Java Backend API (if not on GitHub Pages)
+    // 1. Attempt to call Java/Python Backend API (if not on GitHub Pages)
     if (!AUTH_CONFIG.IS_GITHUB_PAGES && AUTH_CONFIG.API_BASE) {
       try {
         const response = await fetch(`${AUTH_CONFIG.API_BASE}/api/auth/login`, {
@@ -87,13 +150,11 @@ const AuthService = {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.user) {
-            this.saveSession(data.user, data.token, remember);
-            return { success: true, user: data.user, message: data.message };
+            return this.requestMfaChallenge(data.user, remember);
           }
         }
       } catch (apiError) {
-        // Backend not running -> use client-side verification
-        console.log("Java backend offline or unreachable. Falling back to client-side auth engine.", apiError);
+        console.log("Backend offline or unreachable. Falling back to client-side auth engine.", apiError);
       }
     }
 
@@ -113,9 +174,7 @@ const AuthService = {
         avatarUrl: matched.avatar,
         loginTimestamp: Date.now()
       };
-      const token = "tok_client_" + Math.random().toString(36).substring(2);
-      this.saveSession(user, token, remember);
-      return { success: true, user, message: "Welcome back, " + user.displayName + "!" };
+      return this.requestMfaChallenge(user, remember);
     }
 
     throw new Error("Invalid credentials! Please use the demo credentials provided.");
@@ -144,8 +203,7 @@ const AuthService = {
         if (response.ok) {
           const data = await response.json();
           if (data.success && data.user) {
-            this.saveSession(data.user, data.token, remember);
-            return { success: true, user: data.user, message: data.message };
+            return this.requestMfaChallenge(data.user, remember);
           }
         }
       } catch (apiError) {
@@ -166,9 +224,7 @@ const AuthService = {
       loginTimestamp: Date.now()
     };
 
-    const token = "tok_g_client_" + Math.random().toString(36).substring(2);
-    this.saveSession(user, token, remember);
-    return { success: true, user, message: `Signed in successfully with Google as ${user.displayName}!` };
+    return this.requestMfaChallenge(user, remember);
   },
 
   /**
